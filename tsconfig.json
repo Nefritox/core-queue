@@ -4,13 +4,15 @@
 		"module": "commonjs",
 		"declaration": true,
 		"outDir": "./lib",
-		"strict": true
+		"strict": true,
+		"strictNullChecks": false
 	},
 	"include": [
 		"src"
 	],
 	"exclude": [
 		"node_modules",
-		"**/__tests__/*"
+		"**/__tests__/*",
+		"examples"
 	]
 }

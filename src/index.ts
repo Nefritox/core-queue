@@ -1,1 +1,2 @@
-export const Greeter = (name: string) => `Hello ${name}`;
+import { CoreQueue, CoreQueueOptions } from "./core-queue";
+export { CoreQueue, CoreQueueOptions };
