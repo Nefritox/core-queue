@@ -2,6 +2,7 @@
 	"extends": ["tslint:recommended", "tslint-config-prettier"],
 	"rules": {
 		"quotemark": [true, "double"],
-		"array-type": [true, "generic"]
+		"array-type": [true, "generic"],
+		"no-console": [false]
 	  }
  }
