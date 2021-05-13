@@ -28,11 +28,19 @@ export class CoreQueue {
 
 	// #region getters
 	public get size(): number {
+		return this.queue.length + this.tasksInProgress;
+	}
+
+	public get pendingSize(): number {
 		return this.queue.length;
 	}
 
+	public get inProgressSize(): number {
+		return this.tasksInProgress;
+	}
+
 	public get isEmpty(): boolean {
-		if (this.queue.length === 0) {
+		if (this.pendingSize === 0) {
 			return true;
 		}
 
@@ -40,7 +48,7 @@ export class CoreQueue {
 	}
 
 	public get isFull(): boolean {
-		if (this.queue.length >= this.options.maxTasks) {
+		if (this.size === this.options.maxTasks) {
 			return true;
 		}
 
@@ -58,8 +66,8 @@ export class CoreQueue {
 
 
 	// #region methods
-	public enqueue(func: any): Promise<void> {
-		if(this.size >= this.options.maxTasks - 1){
+	public enqueue(func: () => any): Promise<any> {
+		if (this.isFull) {
 			throw new Error("Max number of task reached!");
 		}
 
@@ -76,7 +84,7 @@ export class CoreQueue {
 
 	}
 
-	public async dequeue(): Promise<void> {
+	private async dequeue(): Promise<void> {
 		if (this.isEmpty) {
 			return;
 		}
