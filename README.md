@@ -1,10 +1,10 @@
 # core-queue
+Simple, zero dependency, promise-based queue.
+
 
 **Package is under development.**
 
 ## Installation
-
-
 
 ```bash
 npm install core-queue

@@ -4,9 +4,15 @@ export interface Task {
 	reject: any;
 }
 
+export enum State {
+	running,
+	stopped
+}
+
 export interface CoreQueueOptions {
 	maxTasks: number;
 	maxConcurrency: number;
+	autostart: boolean;
 }
 
 export class CoreQueue {
@@ -14,6 +20,10 @@ export class CoreQueue {
 	private queue: Array<Task> = new Array<Task>();
 	private tasksInProgress: number = 0;
 	private options: CoreQueueOptions;
+	private queueState: State;
+
+	private internalWatcher: Promise<void>;
+	private internalWatcherResolve: any;
 	// #endregion
 
 
@@ -21,6 +31,16 @@ export class CoreQueue {
 	constructor(options?: CoreQueueOptions) {
 		if (options) {
 			this.options = options;
+		} else {
+			this.options = {
+				maxTasks: 10000,
+				maxConcurrency: 0,
+				autostart: true,
+			}
+		}
+
+		if (this.options.autostart) {
+			this.queueState = State.running;
 		}
 	}
 	// #endregion
@@ -66,6 +86,23 @@ export class CoreQueue {
 
 
 	// #region methods
+	public start(): void {
+		this.queueState = State.running;
+		this.dequeue();
+	}
+
+	public stop(): void {
+		this.queueState = State.stopped;
+	}
+
+	public clear(): void {
+		this.queue.length = 0;
+	}
+
+	public async done(): Promise<void> {
+		await this.internalWatcher;
+	}
+
 	public enqueue(func: () => any): Promise<any> {
 		if (this.isFull) {
 			throw new Error("Max number of task reached!");
@@ -79,12 +116,21 @@ export class CoreQueue {
 			};
 
 			this.queue.push(task);
+
+			if (!this.internalWatcher) {
+				this.internalWatcher = new Promise((r) => { this.internalWatcherResolve = r; });
+			}
+
 			this.dequeue();
 		});
 
 	}
 
 	private async dequeue(): Promise<void> {
+		if (this.queueState !== State.running) {
+			return;
+		}
+
 		if (this.isEmpty) {
 			return;
 		}
@@ -104,6 +150,12 @@ export class CoreQueue {
 			task.reject(error);
 		} finally {
 			this.tasksInProgress--;
+
+			if(this.size === 0){
+				this.internalWatcherResolve();
+				this.internalWatcher = null;
+			}
+
 			this.dequeue();
 		}
 	}
