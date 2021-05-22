@@ -1,7 +1,7 @@
 # core-queue
 Simple, zero dependency, promise-based queue.
 
-**Package is under development. API might change. **
+**Package is under development. API might change.**
 
 ## Features
 - Promise based queue.
