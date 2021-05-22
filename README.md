@@ -1,79 +1,116 @@
 # core-queue
 Simple, zero dependency, promise-based queue.
 
+**Package is under development. API might change. **
 
-**Package is under development.**
+## Features
+- Promise based queue.
+- Concurrency.
+- Build-in flow control methods.
 
 ## Installation
-
+Via npm:
 ```bash
 npm install core-queue
 ```
+Via yarn:
+```bash
+yarn add core-queue
+```
 
-## Example
+## Loading the module
+```bash
+import { CoreQueue, CoreQueueOptions } from "core-queue";
+```
 
+## Common usage
+##### Create options
 ```ts
-import { CoreQueue, CoreQueueOptions } from "/core-queue";
+const options: CoreQueueOptions = {
+	maxConcurrency: 1,
+	maxTasks: 10,
+	autostart: true
+};
+```
+##### Create queue
+```ts
+const coreQueue: CoreQueue = new CoreQueue(options);
+```
+##### Add async task and handle result with promises
+```ts
+coreQueue
+	.enqueue(() => someTask())
+	.then(result => {})
+	.catch(error => {});
+```
 
-function timeoutTask(id: number, timeoutMs: number): Promise<number> {
-	return new Promise((resolve, reject) => {
-		const start: number = performance.now();
-		setTimeout(() => {
-			console.log(`Task ${id} completed.`);
-			resolve(start);
-		}, timeoutMs);
-	})
-}
-
-function getRandomIntInclusive(min: number, max: number): number {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function example(): void {
-	const coreQueue: CoreQueue = new CoreQueue(
-		{
-			maxConcurrency: 1,
-			maxTasks: 10
-		}
-	);
-
-	for (let i = 0; i < 10; i++) {
-		coreQueue
-			.enqueue(() => timeoutTask(i, getRandomIntInclusive(500, 1000)))
-			.then((start) => { console.log(`Done in ${Math.round(performance.now() - start)}ms`) })
-			.catch((error) => { console.log(`Error occured ${error.message}`) });
+##### Add async task and await result
+```ts
+	try { 
+		await coreQueue.enqueue(() => someTask());
+	}catch(error){
+		// handle error
 	}
-}
-
-
-example();
+```
+##### Await until every task is settled (resolved or rejected)
+```ts
+await coreQueue.done();
 ```
 
-Output:
-```
-Task 0 completed.
-Done in 520ms
-Task 1 completed.
-Done in 799ms
-Task 2 completed.
-Done in 769ms
-Task 3 completed.
-Done in 892ms
-Task 4 completed.
-Done in 723ms
-Task 5 completed.
-Done in 969ms
-Task 6 completed.
-Done in 646ms
-Task 7 completed.
-Done in 984ms
-Task 8 completed.
-Done in 723ms
-Task 9 completed.
-Done in 892ms
-```
+## API
+### CoreQueue(options)
+Returns new CoreQueue instance.
+
+#### Getters
+##### size ` number`
+- Returns sum of tasks awaiting in queue and tasks which are currently in progress.
+
+##### pendingSize ` number`
+- Returns number of tasks in queue.
+
+##### inProgressSize ` number`
+- Returns number of tasks which currently beign executed.
+
+##### isEmpty ` boolean`
+- Returns `true` if the number of awaiting tasks is zero.
+
+##### isFull ` boolean`
+- Returns `true` if the options limit is exceeded. 
+- Is calculated as pedningTasks + awaitingTasks.
+
+##### peek
+- Returns first element without removing it.
+- Returns `null` if queue is empty.
+
+#### Methods
+##### start() 
+- Start task execution (Have to be called if `autostart` is set to `false`).
+- Could be called after `stop()`
+
+##### stop()
+- Stop task execution.
+- Task that was already started will settle.
+
+##### clear()
+- Removes all pending tasks.
+
+##### done() `promise`
+- Resolves after all tasks are settled and queue is empty.
+
+##### enqueue(()=> {})
+- Add new async task into queue.
+- Throws error if maxTasks is exceeded.
+
+### CoreQueueOptions
+##### maxTasks  `number`
+- Maximum of pending and idle tasks in queue. 
+
+##### maxConcurrency  `number`
+- Maximum of concurrently executed tasks.
+
+##### autostart  `boolean`
+- Specify if tasks should be resolved as soon as possible.
+- If set to `false`, then `start()` have to be called.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
