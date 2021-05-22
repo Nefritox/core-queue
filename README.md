@@ -27,9 +27,9 @@ import { CoreQueue, CoreQueueOptions } from "core-queue";
 ##### Create options
 ```ts
 const options: CoreQueueOptions = {
-	maxConcurrency: 1,
-	maxTasks: 10,
-	autostart: true
+  maxConcurrency: 1,
+  maxTasks: 10,
+  autostart: true
 };
 ```
 ##### Create queue
@@ -39,18 +39,18 @@ const coreQueue: CoreQueue = new CoreQueue(options);
 ##### Add async task and handle result with promises
 ```ts
 coreQueue
-	.enqueue(() => someTask())
-	.then(result => {})
-	.catch(error => {});
+  .enqueue(() => someTask())
+  .then(result => {})
+  .catch(error => {});
 ```
 
 ##### Add async task and await result
 ```ts
-	try { 
-		await coreQueue.enqueue(() => someTask());
-	}catch(error){
-		// handle error
-	}
+try { 
+  await coreQueue.enqueue(() => someTask());
+}catch(error){
+  // handle error
+}
 ```
 ##### Await until every task is settled (resolved or rejected)
 ```ts
